@@ -55,17 +55,6 @@ class Person:
             self.y+=speed
         return self.y
 
-    def pickUpCoin(self, coinX, coinY):
-        if abs(self.y+25-coinX)<25 and abs(self.y+25-coinY)<25:
-            coins+=1
-            coinOnScreen=False
-            return(coins, coinOnScreen)
-
-    def drawCoin(self, coinOnScreen):
-        pygame.draw.circle(window,(255,255,0),(coinX,coinY),10,0)
-        guy.pickUpCoin(coinX, coinY)
-
-    
     def getCoord(self):
         guyX=self.x
         guyY=self.y

@@ -1,4 +1,4 @@
-''' Current Goal: ACTUALLY PICK UP THE COIN!'''
+'''get coin working'''
 import pygame, sys
 from pygame.locals import *
 from Person import *
@@ -47,27 +47,28 @@ while True:
     textpos.centery = 50
     window.blit(text, textpos)
 
+
     #Make Coin
-    if randint(1,500)==1 and not(coinOnScreen):
-        coinX=randint(10,1910)
-        coinY=randint(10,1070)
+    if not(coinOnScreen) and randint(1,100)==1:
         coinOnScreen=True
+        coinX=randint(0,1910)
+        coinY=randint(0,1070)
 
     #Draw Coin
-    '''
     if coinOnScreen:
-        pygame.draw.circle(window,(255,255,0),(coinX,coinY),10,0)
-        guy.pickUpCoin(coinX, coinY)
-    '''
-    guy.drawCoin(coinOnScreen)
-                           
+        pygame.draw.circle(window, (255,255,0),(coinX,coinY),10,0)
+
+    #Pick up Coin
+    getCoord()
+    if coinOnScreen and #Coordinates are close enough:
+        coinOnScreen=False
+        coins+=1
+        
     # Draw your person on the screen
     guy.draw(window)
     
     # Update the screen
     pygame.display.update()
-
-    
     
     # Check for key presses and mouse clicks
     for event in pygame.event.get():
