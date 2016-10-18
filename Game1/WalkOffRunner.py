@@ -1,7 +1,6 @@
 '''get coin working'''
 import pygame, sys
 from pygame.locals import *
-from Person import *
 from random import randint
 
 # Creates the screen to draw on
@@ -10,9 +9,6 @@ window = pygame.display.set_mode((1920,1080),pygame.FULLSCREEN)
 
 # Allows a key that is held down to count as multiple presses
 pygame.key.set_repeat(1,1)
-
-# Creates a Person object named guy
-guy = Person(randint(1,1870),randint(1,1030))
 
 # Colors the screen white
 red=randint(0,255)
@@ -25,9 +21,11 @@ windowFill(255,255,255)
 #Initialize game variables
 HP=100
 coins=0
-font = pygame.font.Font(None, 48)
 speed=3
 coinOnScreen=False
+img = pygame.image.load("dude.gif")
+guyX=randint(0,1870)
+guyY=randint(0,1030)
 
 # Event Loop
 while True:
@@ -35,6 +33,7 @@ while True:
     windowFill(red,green,blue)
 
     #Show Coins and HP
+    font = pygame.font.Font(None, 48)
     text = font.render("COINS: "+str(coins), 1, (0, 0, 0))
     textpos = text.get_rect()
     textpos.centerx = 970
@@ -51,21 +50,21 @@ while True:
     #Make Coin
     if not(coinOnScreen) and randint(1,100)==1:
         coinOnScreen=True
-        coinX=randint(0,1910)
-        coinY=randint(0,1070)
+        coinX=randint(10,1910)
+        coinY=randint(10,1070)
 
     #Draw Coin
     if coinOnScreen:
         pygame.draw.circle(window, (255,255,0),(coinX,coinY),10,0)
 
     #Pick up Coin
-    getCoord()
-    if coinOnScreen and #Coordinates are close enough:
+    '''GET THIS WORKING'''
+    if coinOnScreen and guyX-coinX<50 and guyX-coinX>-1 and guyY-coinY>50 and guyY-coinY>-1:
         coinOnScreen=False
         coins+=1
         
     # Draw your person on the screen
-    guy.draw(window)
+    window.blit(img,(guyX,guyY))
     
     # Update the screen
     pygame.display.update()
@@ -83,16 +82,20 @@ while True:
         elif event.type==KEYDOWN:
 
             if event.key==K_UP: 
-                guy.moveUp(speed)
+                if guyY>1:
+                    guyY-=speed
 
             elif event.key==K_DOWN:
-                guy.moveDown(speed)
+                if guyY<1030:
+                    guyY+=speed
 
             elif event.key==K_LEFT:
-                guy.moveLeft(speed)
+                if guyX>1:
+                    guyX-=speed
 
             elif event.key==K_RIGHT:
-                guy.moveRight(speed)
+                if guyX<1870:
+                    guyX+=speed
 
             elif  event.key==K_SPACE:
                 red=randint(0,255)
