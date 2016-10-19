@@ -13,18 +13,26 @@ pygame.key.set_repeat(1,1)
 red=randint(0,255)
 green=randint(0,255)
 blue=randint(0,255)
+
+#Define Methods
 def windowFill(red,green,blue):
     window.fill((red,green,blue))
-windowFill(255,255,255)
+def drawText(text,centerX,centerY):
+    textpos = text.get_rect()
+    textpos.centerx = centerX
+    textpos.centery = centerY
+    window.blit(text, textpos)
 
-#Initialize game variables
+#Initialize everything
+font=pygame.font.Font(None, 48)
 HP=100
 coins=0
-speed=3
+speed=1
 coinOnScreen=False
 img = pygame.image.load("dude.gif")
 guyX=randint(0,1870)
 guyY=randint(0,1030)
+windowFill(255,255,255)
 
 # Event Loop
 while True:
@@ -32,22 +40,11 @@ while True:
     windowFill(red,green,blue)
 
     #Show Coins and HP
-    font = pygame.font.Font(None, 48)
-    text = font.render("COINS: "+str(coins), 1, (0, 0, 0))
-    textpos = text.get_rect()
-    textpos.centerx = 970
-    textpos.centery = 20
-    window.blit(text, textpos)
-
-    text = font.render("HP: "+str(HP), 1, (0, 0, 0))
-    textpos = text.get_rect()
-    textpos.centerx = 970
-    textpos.centery = 50
-    window.blit(text, textpos)
-
+    drawText(font.render("COINS: "+str(coins), 1, (0, 0, 0)),970,20)
+    drawText(font.render("HP: "+str(HP), 1, (0, 0, 0)),970,50)
 
     #Make Coin
-    if not(coinOnScreen) and randint(1,100)==1:
+    if not(coinOnScreen) and randint(1,500)==1:
         coinOnScreen=True
         coinX=randint(10,1910)
         coinY=randint(10,1070)
@@ -67,11 +64,9 @@ while True:
     # Update the screen
     pygame.display.update()
     
-    # Check for key presses and mouse clicks
+    # Check for key presses
     for event in pygame.event.get():
-        # Determine if the user has closed the window or pressed escape
-        if event.type==QUIT or (event.type==KEYUP and event.key==K_ESCAPE):
-            # Quit the program
+        if event.type==KEYUP and event.key==K_ESCAPE:
             pygame.quit()
             sys.exit()
         
@@ -112,3 +107,26 @@ while True:
                 green=green-1
                 blue=blue-1
                 windowFill(red,green,blue)
+
+            elif event.key==K_1:
+                if coins<speed*speed:
+                    drawText(font.render("NOT ENOUGH COINS! Cost: "+str(speed*speed), 1, (0, 0, 0)),970,1000)
+                    pygame.display.update()
+                    
+                elif speed==10:
+                    drawText(font.render("ALREADY AT MAXIMUM VELOCITY!", 1, (0, 0, 0)),970,1000)
+                    pygame.display.update()
+                    
+                else:
+                    drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed)+" Coins? Y/N", 1, (0, 0, 0)),970,1000)
+                    pygame.display.update()
+                    for event in pygame.event.get():
+                        if event.type==KEYDOWN:
+                            while not(event.type==KEYDOWN and (event.key==K_y or event.key==K_n)):
+                                for event in pygame.event.get():
+                                    if event.type==KEYDOWN:
+                                        if event.key==K_y:
+                                            coins-=speed*speed
+                                            speed+=1
+                                        elif event.key==K_n:
+                                            break
