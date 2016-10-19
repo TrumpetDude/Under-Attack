@@ -1,4 +1,3 @@
-'''get coin working'''
 import pygame, sys
 from pygame.locals import *
 from random import randint
@@ -58,8 +57,7 @@ while True:
         pygame.draw.circle(window, (255,255,0),(coinX,coinY),10,0)
 
     #Pick up Coin
-    '''GET THIS WORKING'''
-    if coinOnScreen and guyX-coinX<50 and guyX-coinX>-1 and guyY-coinY>50 and guyY-coinY>-1:
+    if coinOnScreen and coinX-guyX<50 and coinX-guyX>-1 and guyY-coinY>-50 and guyY-coinY<-1:
         coinOnScreen=False
         coins+=1
         
