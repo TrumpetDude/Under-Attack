@@ -32,7 +32,9 @@ coinOnScreen=False
 img = pygame.image.load("dude.gif")
 guyX=randint(0,1870)
 guyY=randint(0,1030)
-windowFill(255,255,255)
+red=0
+green=0
+blue=0
 
 # Event Loop
 while True:
@@ -40,8 +42,8 @@ while True:
     windowFill(red,green,blue)
 
     #Show Coins and HP
-    drawText(font.render("COINS: "+str(coins), 1, (0, 0, 0)),970,20)
-    drawText(font.render("HP: "+str(HP), 1, (0, 0, 0)),970,50)
+    drawText(font.render("COINS: "+str(coins), 1, (255,255,0)),970,20)
+    drawText(font.render("HP: "+str(HP), 1, (0, 255, 0)),970,50)
 
     #Make Coin
     if not(coinOnScreen) and randint(1,500)==1:
@@ -90,35 +92,17 @@ while True:
                 if guyX<1870:
                     guyX+=speed
 
-            elif  event.key==K_SPACE:
-                red=randint(0,255)
-                green=randint(0,255)
-                blue=randint(0,255)
-                windowFill(red,green,blue)
-                
-            elif  event.key==K_z and red<255 and green<255 and blue<255:
-                red=red+1
-                green=green+1
-                blue=blue+1
-                windowFill(red,green,blue)
-                
-            elif  event.key==K_x and red>1 and green>1 and blue>1:
-                red=red-1
-                green=green-1
-                blue=blue-1
-                windowFill(red,green,blue)
-
             elif event.key==K_1:
                 if coins<speed*speed:
-                    drawText(font.render("NOT ENOUGH COINS! Cost: "+str(speed*speed), 1, (0, 0, 0)),970,1000)
+                    drawText(font.render("NOT ENOUGH COINS! Cost: "+str(speed*speed), 1, (255, 127,0)),970,1000)
                     pygame.display.update()
                     
-                elif speed==10:
-                    drawText(font.render("ALREADY AT MAXIMUM VELOCITY!", 1, (0, 0, 0)),970,1000)
+                elif speed==6:
+                    drawText(font.render("ALREADY AT MAXIMUM VELOCITY!", 1, (255, 0, 0)),970,1000)
                     pygame.display.update()
                     
                 else:
-                    drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed)+" Coins? Y/N", 1, (0, 0, 0)),970,1000)
+                    drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed)+" Coins? Y/N", 1, (255, 255, 0)),970,1000)
                     pygame.display.update()
                     for event in pygame.event.get():
                         if event.type==KEYDOWN:
