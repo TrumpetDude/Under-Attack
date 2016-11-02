@@ -40,6 +40,11 @@ blue=0
 while True:
     
     windowFill(red,green,blue)
+    pygame.draw.rect(window, (50,50,50), (0,0,100,50),0)
+    font=pygame.font.Font(None, 27)
+    drawText(font.render("+ SPEED: 1", 1, (255, 0, 0)),50,25)
+    font=pygame.font.Font(None, 48)
+    
 
     #Show Coins and HP
     drawText(font.render("COINS: "+str(coins), 1, (255,255,0)),970,20)
@@ -56,7 +61,7 @@ while True:
         pygame.draw.circle(window, (255,255,0),(coinX,coinY),10,0)
 
     #Pick up Coin
-    if coinOnScreen and coinX-guyX<50 and coinX-guyX>-1 and guyY-coinY>-50 and guyY-coinY<-1:
+    if coinOnScreen and coinX-guyX<60 and coinX-guyX>-5 and guyY-coinY>-60 and guyY-coinY<10:
         coinOnScreen=False
         coins+=1
         
@@ -81,7 +86,7 @@ while True:
                     guyY-=speed
 
             elif event.key==K_DOWN:
-                if guyY<1030:
+                if guyY<1032:
                     guyY+=speed
 
             elif event.key==K_LEFT:
@@ -89,18 +94,18 @@ while True:
                     guyX-=speed
 
             elif event.key==K_RIGHT:
-                if guyX<1870:
+                if guyX<1875:
                     guyX+=speed
-
-            elif event.key==K_1:
-                if coins<speed*speed:
-                    drawText(font.render("NOT ENOUGH COINS! Cost: "+str(speed*speed), 1, (255, 127,0)),970,1000)
-                    pygame.display.update()
                     
+            elif event.key==K_1:
+                if coins<speed*speed*speed:
+                    drawText(font.render("NOT ENOUGH COINS! Cost: "+str(speed*speed*speed), 1, (255, 127,0)),970,1000)
+                    pygame.display.update()
+                        
                 elif speed==6:
                     drawText(font.render("ALREADY AT MAXIMUM VELOCITY!", 1, (255, 0, 0)),970,1000)
                     pygame.display.update()
-                    
+                        
                 else:
                     drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed)+" Coins? Y/N", 1, (255, 255, 0)),970,1000)
                     pygame.display.update()
