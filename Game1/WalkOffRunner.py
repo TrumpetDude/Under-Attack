@@ -36,6 +36,13 @@ red=0
 green=0
 blue=0
 
+#Enemy Stuff
+enemy1img=pygame.image.load("enemy1.gif")
+#[IMAGE, HP, SPEED, damage per loop (small, display of health is rounded)]
+#enemy1=[enemy1img, 10, 2, 0.01]
+enemyOnScreen=False
+enemyType=None
+
 # Event Loop
 while True:
     
@@ -48,7 +55,7 @@ while True:
 
     #Show Coins and HP
     drawText(font.render("COINS: "+str(coins), 1, (255,255,0)),970,20)
-    drawText(font.render("HP: "+str(HP), 1, (0, 255, 0)),970,50)
+    drawText(font.render("HP: "+str(int(HP//1)), 1, ((0+2.5*(100-HP))//1, (255-2.5*(100-HP))//1, 0)),970,50)
 
     #Make Coin
     if not(coinOnScreen) and randint(1,500)==1:
@@ -58,22 +65,53 @@ while True:
 
     #Draw Coin
     if coinOnScreen:
-        pygame.draw.circle(window, (255,255,0),(coinX,coinY),10,0)
+        pygame.draw.circle(window, (255,255,0),(coinX,coinY),8,0)
 
     #Pick up Coin
     if coinOnScreen and coinX-guyX<60 and coinX-guyX>-5 and guyY-coinY>-60 and guyY-coinY<10:
         coinOnScreen=False
         coins+=1
+
+    #Make Enemy
+    if not(enemyOnScreen) and randint(1,1000)==1:
+        enemyOnScreen=True
+        enemyType=1
+        enemyX=randint(0,1888)
+        enemyY=randint(0,1048)
+
+    if enemyOnScreen and enemyType==1:
+        if enemyX<guyX:
+            enemyX+=1
+        if enemyX>guyX:
+            enemyX-=1
+        if enemyY<guyY:
+            enemyY+=1
+        if enemyY>guyY:
+            enemyY-=1
+
+
+        window.blit(enemy1img, (enemyX, enemyY))
+
+    if enemyOnScreen and enemyType==1 and enemyX-guyX<48 and enemyX-guyX>-32 and guyY-enemyY>-48 and guyY-enemyY<32:
+        HP-=0.01
+    
+
+
+
+        
         
     # Draw your person on the screen
     window.blit(img,(guyX,guyY))
     
     # Update the screen
     pygame.display.update()
-    
+
+    if HP<=0:
+        pygame.quit()
+        sys.exit()
     # Check for key presses
     for event in pygame.event.get():
-        if event.type==KEYUP and event.key==K_ESCAPE:
+        if (event.type==KEYUP and event.key==K_ESCAPE):
             pygame.quit()
             sys.exit()
         
