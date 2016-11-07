@@ -29,7 +29,8 @@ HP=100
 coins=0
 speed=1
 coinOnScreen=False
-img = pygame.image.load("dude.gif")
+dude = pygame.image.load("dude.gif")
+dudeDamaged = pygame.image.load("dudeDamaged.gif")
 guyX=randint(0,1870)
 guyY=randint(0,1030)
 red=0
@@ -37,7 +38,8 @@ green=0
 blue=0
 
 #Enemy Stuff
-enemy1img=pygame.image.load("enemy1.gif")
+enemy1=pygame.image.load("enemy1.gif")
+enemy1damaged=pygame.image.load("enemy1damaged.gif")
 #[IMAGE, HP, SPEED, damage per loop (small, display of health is rounded)]
 #enemy1=[enemy1img, 10, 2, 0.01]
 enemyOnScreen=False
@@ -78,7 +80,16 @@ while True:
         enemyType=1
         enemyX=randint(0,1888)
         enemyY=randint(0,1048)
+        enemyHP=10
 
+
+    # Draw your person on the screen
+    window.blit(dude,(guyX,guyY))
+    if enemyOnScreen and enemyType==1 and enemyX-guyX<48 and enemyX-guyX>-32 and guyY-enemyY>-48 and guyY-enemyY<32:
+        HP-=0.01
+        window.blit(dudeDamaged,(guyX,guyY))
+
+    
     if enemyOnScreen and enemyType==1:
         if enemyX<guyX:
             enemyX+=1
@@ -88,20 +99,12 @@ while True:
             enemyY+=1
         if enemyY>guyY:
             enemyY-=1
-
-
-        window.blit(enemy1img, (enemyX, enemyY))
-
-    if enemyOnScreen and enemyType==1 and enemyX-guyX<48 and enemyX-guyX>-32 and guyY-enemyY>-48 and guyY-enemyY<32:
-        HP-=0.01
+        window.blit(enemy1, (enemyX, enemyY))
     
+    if enemyOnScreen and enemyHP<=0:
+        enemyOnScreen=False
+        coins+=10
 
-
-
-        
-        
-    # Draw your person on the screen
-    window.blit(img,(guyX,guyY))
     
     # Update the screen
     pygame.display.update()
@@ -157,3 +160,11 @@ while True:
                                             speed+=1
                                         elif event.key==K_n:
                                             break
+
+        elif event.type==KEYUP:
+            if event.key==K_SPACE:
+                if enemyOnScreen and enemyType==1 and enemyX-guyX<48 and enemyX-guyX>-32 and guyY-enemyY>-48 and guyY-enemyY<32:
+                    enemyHP-=1
+                    window.blit(enemy1damaged, (enemyX,enemyY))
+                    pygame.display.update()
+                    pygame.time.delay(100)
