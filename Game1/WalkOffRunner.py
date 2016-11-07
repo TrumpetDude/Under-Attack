@@ -156,7 +156,7 @@ while True:
                                 for event in pygame.event.get():
                                     if event.type==KEYDOWN:
                                         if event.key==K_y:
-                                            coins-=speed*speed
+                                            coins-=speed*speed*speed
                                             speed+=1
                                         elif event.key==K_n:
                                             break
