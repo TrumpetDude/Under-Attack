@@ -28,6 +28,7 @@ font=pygame.font.Font(None, 48)
 HP=100
 coins=0
 speed=1
+regenSpeed=0.001
 coinOnScreen=False
 dude = pygame.image.load("dude.gif")
 dudeDamaged = pygame.image.load("dudeDamaged.gif")
@@ -36,12 +37,14 @@ guyY=randint(0,1030)
 red=0
 green=0
 blue=0
+HPr=0
+HPg=255
 
 #Enemy Stuff
 enemy1=pygame.image.load("enemy1.gif")
 enemy1damaged=pygame.image.load("enemy1damaged.gif")
 #[IMAGE, HP, SPEED, damage per loop (small, display of health is rounded)]
-#enemy1=[enemy1img, 10, 2, 0.01]
+#enemy1=[10, 2, 0.01]
 enemyOnScreen=False
 enemyType=None
 
@@ -49,16 +52,19 @@ enemyType=None
 while True:
     
     windowFill(red,green,blue)
-    pygame.draw.rect(window, (50,50,50), (0,0,100,50),0)
+    pygame.draw.rect(window, (50,50,50), (0,0,250,50),0)
+    pygame.draw.line(window,(0,0,0) ,(105,0), (105,50), 5)
     font=pygame.font.Font(None, 27)
     drawText(font.render("+ SPEED: 1", 1, (255, 0, 0)),50,25)
+    drawText(font.render("+ HP REGEN: 2", 1, (255, 0, 0)),175,25)
     font=pygame.font.Font(None, 48)
     
 
     #Show Coins and HP
     drawText(font.render("COINS: "+str(coins), 1, (255,255,0)),970,20)
-    drawText(font.render("HP: "+str(int(HP//1)), 1, ((0+2.5*(100-HP))//1, (255-2.5*(100-HP))//1, 0)),970,50)
-
+    drawText(font.render("HP: "+str(int(HP//1)), 1, (HPr, HPg, 0)),970,50)
+    if enemyOnScreen:
+        drawText(font.render("ENEMY HP: "+str(int(enemyHP//1)), 1, (255,0,0)),970,80)
     #Make Coin
     if not(coinOnScreen) and randint(1,500)==1:
         coinOnScreen=True
@@ -83,13 +89,33 @@ while True:
         enemyHP=10
 
 
-    # Draw your person on the screen
+    #Draw person on the screen
     window.blit(dude,(guyX,guyY))
+
+    #Take damage
     if enemyOnScreen and enemyType==1 and enemyX-guyX<48 and enemyX-guyX>-32 and guyY-enemyY>-48 and guyY-enemyY<32:
         HP-=0.01
         window.blit(dudeDamaged,(guyX,guyY))
+        #Change HP text color
+        if HPr<=252.5:
+            HPr+=.25
+        elif HPr<255:
+            HPr=255
+            
+        if HPg>=2.5 and HPr==255:
+            HPg-=0.25
+        elif HP>0 and HPr==255:
+            HPg=0
+            
+        
 
-    
+    #Regen HP
+    if HP<100-regenSpeed:
+        HP+=regenSpeed
+    elif HP<100:
+        HP=100
+
+    #Move and draw enemy
     if enemyOnScreen and enemyType==1:
         if enemyX<guyX:
             enemyX+=1
@@ -148,7 +174,7 @@ while True:
                     pygame.display.update()
                         
                 else:
-                    drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed)+" Coins? Y/N", 1, (255, 255, 0)),970,1000)
+                    drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed*speed)+" Coins? Y/N", 1, (255, 255, 0)),970,1000)
                     pygame.display.update()
                     for event in pygame.event.get():
                         if event.type==KEYDOWN:
@@ -158,6 +184,29 @@ while True:
                                         if event.key==K_y:
                                             coins-=speed*speed*speed
                                             speed+=1
+                                        elif event.key==K_n:
+                                            break
+
+            elif event.key==K_2:
+                if coins<int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed):
+                    drawText(font.render("NOT ENOUGH COINS! Cost: "+str(int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed)), 1, (255, 127,0)),970,1000)
+                    pygame.display.update()
+                        
+                elif regenSpeed==0.006:
+                    drawText(font.render("ALREADY AT MAXIMUM HP REGEN SPEED!", 1, (255, 0, 0)),970,1000)
+                    pygame.display.update()
+                        
+                else:
+                    drawText(font.render("Confirm Purchase \"HP REGEN SPEED +1\" for "+str(int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed))+" Coins? Y/N", 1, (255, 255, 0)),970,1000)
+                    pygame.display.update()
+                    for event in pygame.event.get():
+                        if event.type==KEYDOWN:
+                            while not(event.type==KEYDOWN and (event.key==K_y or event.key==K_n)):
+                                for event in pygame.event.get():
+                                    if event.type==KEYDOWN:
+                                        if event.key==K_y:
+                                            coins-=int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed)
+                                            regenSpeed+=0.001
                                         elif event.key==K_n:
                                             break
 
