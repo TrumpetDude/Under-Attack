@@ -39,18 +39,19 @@ green=0
 blue=0
 HPr=0
 HPg=255
+pygame.mouse.set_visible(False)
 
 #Enemy Stuff
 enemy1=pygame.image.load("enemy1.gif")
 enemy1damaged=pygame.image.load("enemy1damaged.gif")
 #[IMAGE, HP, SPEED, damage per loop (small, display of health is rounded)]
-#enemy1=[10, 2, 0.01]
-enemyOnScreen=False
-enemyType=None
+#enemy1=[10, 2, 0.05]
+enemy1OnScreen=False
 
 # Event Loop
 while True:
-    
+
+    #Draw background and words
     windowFill(red,green,blue)
     pygame.draw.rect(window, (50,50,50), (0,0,250,50),0)
     pygame.draw.line(window,(0,0,0) ,(105,0), (105,50), 5)
@@ -58,13 +59,11 @@ while True:
     drawText(font.render("+ SPEED: 1", 1, (255, 0, 0)),50,25)
     drawText(font.render("+ HP REGEN: 2", 1, (255, 0, 0)),175,25)
     font=pygame.font.Font(None, 48)
-    
-
-    #Show Coins and HP
     drawText(font.render("COINS: "+str(coins), 1, (255,255,0)),970,20)
     drawText(font.render("HP: "+str(int(HP//1)), 1, (HPr, HPg, 0)),970,50)
-    if enemyOnScreen:
-        drawText(font.render("ENEMY HP: "+str(int(enemyHP//1)), 1, (255,0,0)),970,80)
+    if enemy1OnScreen:
+        drawText(font.render("TOTAL ENEMY HP: "+str(int(enemy1HP//1)), 1, (255,0,0)),970,80)
+        
     #Make Coin
     if not(coinOnScreen) and randint(1,500)==1:
         coinOnScreen=True
@@ -80,57 +79,52 @@ while True:
         coinOnScreen=False
         coins+=1
 
-    #Make Enemy
-    if not(enemyOnScreen) and randint(1,1000)==1:
-        enemyOnScreen=True
-        enemyType=1
-        enemyX=randint(0,1888)
-        enemyY=randint(0,1048)
-        enemyHP=10
+    #Make Enemy1
+    if not(enemy1OnScreen) and randint(1,500)==1:
+        enemy1OnScreen=True
+        enemy1X=randint(0,1888)
+        enemy1Y=randint(0,1048)
+        enemy1HP=10
 
 
     #Draw person on the screen
     window.blit(dude,(guyX,guyY))
 
-    #Take damage
-    if enemyOnScreen and enemyType==1 and enemyX-guyX<48 and enemyX-guyX>-32 and guyY-enemyY>-48 and guyY-enemyY<32:
-        HP-=0.01
+    #Take damage from enemy 1
+    if enemy1OnScreen and enemy1X-guyX<48 and enemy1X-guyX>-32 and guyY-enemy1Y>-48 and guyY-enemy1Y<32:
+        HP-=0.05
         window.blit(dudeDamaged,(guyX,guyY))
-        #Change HP text color
-        if HPr<=252.5:
-            HPr+=.25
-        elif HPr<255:
-            HPr=255
-            
-        if HPg>=2.5 and HPr==255:
-            HPg-=0.25
-        elif HP>0 and HPr==255:
-            HPg=0
-            
+    if HP>=50:
+        HPr=0+5*(100-HP)
+    else:
+        HPr=255
         
+    if HPr==255:
+        HPg=255-5*(50-HP)
 
+    
+
+    #Move and draw enemy1
+    if enemy1OnScreen:
+        if enemy1X<guyX:
+            enemy1X+=1
+        if enemy1X>guyX:
+            enemy1X-=1
+        if enemy1Y<guyY:
+            enemy1Y+=1
+        if enemy1Y>guyY:
+            enemy1Y-=1
+        window.blit(enemy1, (enemy1X, enemy1Y))
+
+    #Kill enemy1
+    if enemy1OnScreen and enemy1HP<=0:
+        enemy1OnScreen=False
+        coins+=10
     #Regen HP
     if HP<100-regenSpeed:
         HP+=regenSpeed
     elif HP<100:
         HP=100
-
-    #Move and draw enemy
-    if enemyOnScreen and enemyType==1:
-        if enemyX<guyX:
-            enemyX+=1
-        if enemyX>guyX:
-            enemyX-=1
-        if enemyY<guyY:
-            enemyY+=1
-        if enemyY>guyY:
-            enemyY-=1
-        window.blit(enemy1, (enemyX, enemyY))
-    
-    if enemyOnScreen and enemyHP<=0:
-        enemyOnScreen=False
-        coins+=10
-
     
     # Update the screen
     pygame.display.update()
@@ -174,17 +168,17 @@ while True:
                     pygame.display.update()
                         
                 else:
-                    drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed*speed)+" Coins? Y/N", 1, (255, 255, 0)),970,1000)
+                    drawText(font.render("Confirm Purchase \"SPEED +1\" for "+str(speed*speed*speed)+" Coins? ENTER/BACKSPACE", 1, (255, 255, 0)),970,1000)
                     pygame.display.update()
                     for event in pygame.event.get():
                         if event.type==KEYDOWN:
-                            while not(event.type==KEYDOWN and (event.key==K_y or event.key==K_n)):
+                            while not(event.type==KEYDOWN and (event.key==K_RETURN or event.key==K_BACKSPACE)):
                                 for event in pygame.event.get():
                                     if event.type==KEYDOWN:
-                                        if event.key==K_y:
+                                        if event.key==K_RETURN:
                                             coins-=speed*speed*speed
                                             speed+=1
-                                        elif event.key==K_n:
+                                        elif event.key==K_BACKSPACE:
                                             break
 
             elif event.key==K_2:
@@ -197,23 +191,23 @@ while True:
                     pygame.display.update()
                         
                 else:
-                    drawText(font.render("Confirm Purchase \"HP REGEN SPEED +1\" for "+str(int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed))+" Coins? Y/N", 1, (255, 255, 0)),970,1000)
+                    drawText(font.render("Confirm Purchase \"HP REGEN SPEED +1\" for "+str(int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed))+" Coins? ENTER/BACKSPACE", 1, (255, 255, 0)),970,1000)
                     pygame.display.update()
                     for event in pygame.event.get():
                         if event.type==KEYDOWN:
-                            while not(event.type==KEYDOWN and (event.key==K_y or event.key==K_n)):
+                            while not(event.type==KEYDOWN and (event.key==K_RETURN or event.key==K_BACKSPACE)):
                                 for event in pygame.event.get():
                                     if event.type==KEYDOWN:
-                                        if event.key==K_y:
+                                        if event.key==K_RETURN:
                                             coins-=int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed)
                                             regenSpeed+=0.001
-                                        elif event.key==K_n:
+                                        elif event.key==K_BACKSPACE:
                                             break
 
         elif event.type==KEYUP:
             if event.key==K_SPACE:
-                if enemyOnScreen and enemyType==1 and enemyX-guyX<48 and enemyX-guyX>-32 and guyY-enemyY>-48 and guyY-enemyY<32:
-                    enemyHP-=1
-                    window.blit(enemy1damaged, (enemyX,enemyY))
+                if enemy1OnScreen and enemy1X-guyX<48 and enemy1X-guyX>-32 and guyY-enemy1Y>-48 and guyY-enemy1Y<32:
+                    enemy1HP-=1
+                    window.blit(enemy1damaged, (enemy1X,enemy1Y))
                     pygame.display.update()
                     pygame.time.delay(100)
