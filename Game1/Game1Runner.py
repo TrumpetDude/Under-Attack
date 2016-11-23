@@ -5,6 +5,7 @@ from random import randint
 # Creates the screen to draw on
 pygame.init()
 window = pygame.display.set_mode((1300,700))#,pygame.FULLSCREEN)
+pygame.display.set_caption("Game 1","Game 1")
 
 # Allows a key that is held down to count as multiple presses
 pygame.key.set_repeat(1,1)
@@ -59,8 +60,8 @@ zombieDamaged=pygame.image.load("zombieDamaged.gif")
 
 
 # Event Loop
-while True:
-
+while HP>0:
+    
     #Draw Background and words
     windowFill(red,green,blue)
     pygame.draw.rect(window, (50,50,50), (0,0,315,50),0)
@@ -187,10 +188,6 @@ while True:
         
     # Update the screen
     pygame.display.update()
-
-    if HP<=0:
-        pygame.quit()
-        sys.exit()
         
     # Check for key presses
     for event in pygame.event.get():
@@ -275,3 +272,11 @@ while True:
                     window.blit(enemy1damaged, (enemy1X,enemy1Y))
                     pygame.display.update()
                     pygame.time.delay(100)
+for size in range(1,120):
+    drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
+    pygame.display.update()
+drawText("GAME OVER!", 120, (255,0,0),650,350)
+pygame.display.update()
+pygame.time.wait(3000)
+pygame.quit()
+sys.exit()
