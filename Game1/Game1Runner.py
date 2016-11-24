@@ -26,6 +26,7 @@ def drawText(text, size, color, centerX, centerY):
 #Initialize everything
 HP=100
 coins=0
+score=0
 speed=1
 regenSpeed=0.001
 coinOnScreen=False
@@ -60,7 +61,7 @@ zombieDamaged=pygame.image.load("zombieDamaged.gif")
 
 
 # Event Loop
-while HP>0:
+while HP>0:#Test this against while True for speed
     
     #Draw Background and words
     windowFill(red,green,blue)
@@ -70,6 +71,7 @@ while HP>0:
     drawText("+ HP REGEN: 2",12,(255, 0, 255),220,25)
     drawText("COINS: "+str(coins), 26, (255,255,0),650,20)
     drawText("HP: "+str(int(HP//1)), 26, (HPr, HPg, 0),650,50)
+    drawText("SCORE: "+str(score), 26, (255,255,0),1100,20)
     if enemy1OnScreen or enemy2OnScreen:
         drawText("TOTAL ENEMY HP: "+str(int(enemy1HP//1)+int(enemy2HP//1)), 26, (255,0,0),650,80)
 
@@ -95,6 +97,7 @@ while HP>0:
     if coinOnScreen and coinX-guyX<60 and coinX-guyX>-5 and guyY-coinY>-60 and guyY-coinY<10:
         coinOnScreen=False
         coins+=1
+        score+=10
 
     #Make Enemy1
     if not(enemy1OnScreen) and randint(1,1000)==1:
@@ -163,13 +166,14 @@ while HP>0:
             enemy2OnScreen=False
             coins+=25
             enemy2HP=0
+            score+=500
 
     #Check if enemy1 is dead
     if enemy1OnScreen and enemy1HP<=0:
         enemy1OnScreen=False
         coins+=10
         enemy1HP=0
-        
+        score+=250
 
     #Regen HP
     if HP<100-regenSpeed:
@@ -182,8 +186,8 @@ while HP>0:
         chestOnScreen=False
         window.blit(chestOpened, (chestX-15,chestY))
         pygame.display.update()
-        prize=randint(1,3)
         coins+=randint(10,50)
+        score+=10*randint(10,100)
         pygame.time.delay(500)
         
     # Update the screen
@@ -272,11 +276,13 @@ while HP>0:
                     window.blit(enemy1damaged, (enemy1X,enemy1Y))
                     pygame.display.update()
                     pygame.time.delay(100)
-for size in range(1,120):
-    drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
-    pygame.display.update()
-drawText("GAME OVER!", 120, (255,0,0),650,350)
-pygame.display.update()
-pygame.time.wait(3000)
-pygame.quit()
-sys.exit()
+
+        if HP<=0:
+            for size in range(1,120):
+                drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
+                pygame.display.update()
+            drawText("GAME OVER!", 120, (255,0,0),650,350)
+            pygame.display.update()
+            pygame.time.wait(3000)
+            pygame.quit()
+            sys.exit()
