@@ -1,10 +1,10 @@
 # Game 1
 This game is currently unnamed.
 It is a game where your guy goes around doing stuff.
-Here is what you can currrently do:
+Here is what is done in the game:
 
-Move, die, get coins via pickups, chests, and killing enemies, fight, kill and get killed by enemy1, kill enemy2 using enemy1, get damaged by enemy2, upgrade speed, and upgrade health regen.
+Movement, dying, coin pickups, chests, fightig, killing and get killed by enemy1, killing enemy2 using enemy1, getting damaged by enemy2, upgrading speed and health regen, Game-Over animation, and a score(not saved).
 
 Here is what I want to add in the near future: 
 
-Instruction and Game-Over screen, implementation of zombie either as separate enemy or ill effects of a current enemy, and pause button.
+Instruction screen, implementation of zombie either as separate enemy or ill effects of a current enemy, highscore saving, and pause button.
