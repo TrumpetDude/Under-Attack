@@ -1,16 +1,13 @@
+#Setup
 import pygame, sys
 from pygame.locals import *
 from random import randint
-
-# Creates the screen to draw on
 pygame.init()
 window = pygame.display.set_mode((1300,700))
 pygame.display.set_caption("Game 1","Game 1")
-
-# Allows a key that is held down to count as multiple presses
 pygame.key.set_repeat(1,1)
 
-#Define Methods
+#Methods
 def windowFill(red,green,blue):
     window.fill((red,green,blue))
 def drawText(text, size, color, centerX, centerY):
@@ -21,9 +18,7 @@ def drawText(text, size, color, centerX, centerY):
     textpos.centery=centerY
     window.blit(renderedText, textpos)
 
-
-
-#Initialize everything
+#Initialize Variables
 ticks=0
 HP=100
 coins=0
@@ -31,14 +26,6 @@ score=0
 baseSpeed=1
 speedStart=-10001
 regenSpeed=0.001
-coinOnScreen=False
-chestOnScreen=False
-doubleSpeedOnScreen=False
-chest=pygame.image.load("chest.gif")
-chestOpened=pygame.image.load("chestOpened.gif")
-dude=pygame.image.load("dude.gif")
-dudeDamaged=pygame.image.load("dudeDamaged.gif")
-doubleSpeed=pygame.image.load("doubleSpeed.gif")
 guyX=randint(0,1250)
 guyY=randint(0,650)
 red=0
@@ -46,22 +33,29 @@ green=0
 blue=0
 HPr=0
 HPg=255
-#pygame.mouse.set_visible(False)
-
-#Enemy Stuff
+coinOnScreen=False
+chestOnScreen=False
+doubleSpeedOnScreen=False
+plusHealthOnScreen=False
 enemy1OnScreen=False
 enemy2OnScreen=False
 enemy1HP=0
 enemy2HP=0
+
+#Load Images
 enemy1=pygame.image.load("enemy1.gif")
 enemy1damaged=pygame.image.load("enemy1damaged.gif")
 enemy2=pygame.image.load("enemy2.gif")
 enemy2damaged=pygame.image.load("enemy2damaged.gif")
-zombie=pygame.image.load("zombie.gif")
-zombieDamaged=pygame.image.load("zombieDamaged.gif")
+chestOpened=pygame.image.load("chestOpened.gif")
+dude=pygame.image.load("dude.gif")
+dudeDamaged=pygame.image.load("dudeDamaged.gif")
+chest=pygame.image.load("chest.gif")
+doubleSpeed=pygame.image.load("doubleSpeed.gif")
+plusHealth=pygame.image.load("health.gif")
 
 
-# Event Loop
+
 while HP>0:
     ticks+=1
     
@@ -92,6 +86,11 @@ while HP>0:
         doubleSpeedOnScreen=True
         speedX=randint(0,1267)
         speedY=randint(0,667)
+    #Make +Health
+    if not(plusHealthOnScreen) and randint(1,1000)==1:
+        plusHealthOnScreen=True
+        healthX=randint(0,1267)
+        healthY=randint(0,667)
         
     #Draw Coin
     if coinOnScreen:
@@ -108,8 +107,8 @@ while HP>0:
             speedX=1254
         if speedY<2:
             speedY=2
-        if speedY>654:
-            speedY=654
+        if speedY>652:
+            speedY=652
         if speedX<=guyX:
             speedX-=1
         elif speedX>=guyX:
@@ -118,7 +117,25 @@ while HP>0:
             speedY-=1
         elif speedY>=guyY:
             speedY+=1
-        
+    #Draw and Move +Health
+    if plusHealthOnScreen:
+        window.blit(plusHealth, (healthX, healthY))
+        if healthX<1:
+            healthX=1
+        if healthX>1254:
+            healthX=1254
+        if healthY<2:
+            healthY=2
+        if healthY>652:
+            healthY=652
+        if healthX<=guyX:
+            healthX-=1
+        elif healthX>=guyX:
+            healthX+=1
+        if healthY<=guyY:
+            healthY-=1
+        elif healthY>=guyY:
+            healthY+=1
         
         
     #Pick up Coin
@@ -131,6 +148,14 @@ while HP>0:
         doubleSpeedOnScreen=False
         speedStart=ticks
         score+=50
+    #Pick up +Health
+    if plusHealthOnScreen and healthX-guyX<48 and healthX-guyX>-32 and guyY-healthY>-48 and guyY-healthY<32:
+        plusHealthOnScreen=False
+        score+=50
+        HP+=5
+        if HP>100:
+            HP=100
+            
 
     #Make Enemy1
     if not(enemy1OnScreen) and randint(1,1000)==1:
@@ -245,7 +270,7 @@ while HP>0:
                     guyY-=speed
 
             elif event.key==K_s:
-                if guyY<650:
+                if guyY<652:
                     guyY+=speed
 
             elif event.key==K_a:
@@ -315,13 +340,13 @@ while HP>0:
                     pygame.time.delay(100)
                     
 for size in range(1,120):
+    pygame.time.delay(1)
     drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
     pygame.display.update()
 drawText("GAME OVER!", 120, (255,0,0),650,350)
 pygame.display.update()
-pygame.time.delay(1000)
 while True:
     for event in pygame.event.get():
-        if event:
+        if (event.type==KEYUP and event.key==K_ESCAPE) or event.type==QUIT:
             pygame.quit()
             sys.exit()
