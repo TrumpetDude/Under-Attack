@@ -4,7 +4,7 @@ from random import randint
 
 # Creates the screen to draw on
 pygame.init()
-window = pygame.display.set_mode((1300,700))#,pygame.FULLSCREEN)
+window = pygame.display.set_mode((1300,700))
 pygame.display.set_caption("Game 1","Game 1")
 
 # Allows a key that is held down to count as multiple presses
@@ -22,19 +22,22 @@ def drawText(text, size, color, centerX, centerY):
     window.blit(renderedText, textpos)
 
 
-
 #Initialize everything
+ticks=0
 HP=100
 coins=0
 score=0
-speed=1
+baseSpeed=1
+speedStart=-10001
 regenSpeed=0.001
 coinOnScreen=False
 chestOnScreen=False
+doubleSpeedOnScreen=False
 chest=pygame.image.load("chest.gif")
 chestOpened=pygame.image.load("chestOpened.gif")
 dude=pygame.image.load("dude.gif")
-dudeDamaged = pygame.image.load("dudeDamaged.gif")
+dudeDamaged=pygame.image.load("dudeDamaged.gif")
+doubleSpeed=pygame.image.load("doubleSpeed.gif")
 guyX=randint(0,1250)
 guyY=randint(0,650)
 red=0
@@ -55,13 +58,11 @@ enemy2=pygame.image.load("enemy2.gif")
 enemy2damaged=pygame.image.load("enemy2damaged.gif")
 zombie=pygame.image.load("zombie.gif")
 zombieDamaged=pygame.image.load("zombieDamaged.gif")
-#[IMAGE, HP, SPEED, damage per loop (small, display of health is rounded)]
-#enemy1=[10, 2, 0.05]
-#enemy2=[20, 1, 10 (one time, also makes dude into Zombie)
 
 
 # Event Loop
-while HP>0:#Test this against while True for speed
+while HP>0:
+    ticks+=1
     
     #Draw Background and words
     windowFill(red,green,blue)
@@ -85,6 +86,11 @@ while HP>0:#Test this against while True for speed
         chestOnScreen=True
         chestX=randint(16,1200)
         chestY=randint(1,639)
+    #Make Double Speed
+    if not(doubleSpeedOnScreen) and randint(1,500)==1 and ticks-speedStart>500:
+        doubleSpeedOnScreen=True
+        speedX=randint(0,1267)
+        speedY=randint(0,667)
         
     #Draw Coin
     if coinOnScreen:
@@ -92,12 +98,37 @@ while HP>0:#Test this against while True for speed
     #Draw Chest
     if chestOnScreen:
         window.blit(chest, (chestX, chestY))
-        
+    #Draw and Move Double Speed
+    if doubleSpeedOnScreen:
+        window.blit(doubleSpeed, (speedX, speedY))
+        if speedX<1:
+            speedX=1
+        if speedX>1254:
+            speedX=1254
+        if speedY<2:
+            speedY=2
+        if speedY>654:
+            speedY=654
+        if speedX<=guyX:
+            speedX-=1
+        elif speedX>=guyX:
+            speedX+=1
+        if speedY<=guyY:
+            speedY-=1
+        elif speedY>=guyY:
+            speedY+=1
+
+     
     #Pick up Coin
     if coinOnScreen and coinX-guyX<60 and coinX-guyX>-5 and guyY-coinY>-60 and guyY-coinY<10:
         coinOnScreen=False
         coins+=1
         score+=10
+    #Pick up Double Speed
+    if doubleSpeedOnScreen and speedX-guyX<48 and speedX-guyX>-32 and guyY-speedY>-48 and guyY-speedY<32:
+        doubleSpeedOnScreen=False
+        speedStart=ticks
+        score+=50
 
     #Make Enemy1
     if not(enemy1OnScreen) and randint(1,1000)==1:
@@ -150,11 +181,11 @@ while HP>0:#Test this against while True for speed
     if enemy2OnScreen:
         if enemy2X<guyX:
             enemy2X+=1
-        if enemy2X>guyX:
+        elif enemy2X>guyX:
             enemy2X-=1
         if enemy2Y<guyY:
             enemy2Y+=1
-        if enemy2Y>guyY:
+        elif enemy2Y>guyY:
             enemy2Y-=1
         window.blit(enemy2, (enemy2X, enemy2Y))
 
@@ -202,6 +233,10 @@ while HP>0:#Test this against while True for speed
         # Check if an arrow key is pressed and 
         # move guy in the correct direction
         elif event.type==KEYDOWN:
+            if ticks-speedStart<500:
+                speed=baseSpeed*2
+            else:
+                speed=baseSpeed
 
             if event.key==K_w:
                 if guyY>1:
@@ -224,16 +259,16 @@ while HP>0:#Test this against while True for speed
                 
                     
             elif event.key==K_1:
-                if speed>=5.999:
+                if baseSpeed>=5.999:
                     drawText("ALREADY AT MAXIMUM VELOCITY!", 24, (255, 0, 0),650,680)
                     pygame.display.update()
 
-                elif coins<speed*speed*speed:
-                    drawText("NOT ENOUGH COINS! Cost: "+str(speed*speed*speed), 24, (255, 127,0),650,680)
+                elif coins<baseSpeed*baseSpeed*baseSpeed:
+                    drawText("NOT ENOUGH COINS! Cost: "+str(baseSpeed*baseSpeed*baseSpeed), 24, (255, 127,0),650,680)
                     pygame.display.update()
                         
                 else:
-                    drawText("Confirm Purchase \"SPEED +1\" for "+str(speed*speed*speed)+" Coins? ENTER/BACKSPACE", 20, (0, 0, 255),650,680)
+                    drawText("Confirm Purchase \"SPEED +1\" for "+str(baseSpeed*baseSpeed*baseSpeed)+" Coins? ENTER/BACKSPACE", 20, (0, 0, 255),650,680)
                     pygame.display.update()
                     for event in pygame.event.get():
                         if event.type==KEYDOWN:
@@ -241,8 +276,8 @@ while HP>0:#Test this against while True for speed
                                 for event in pygame.event.get():
                                     if event.type==KEYDOWN:
                                         if event.key==K_RETURN:
-                                            coins-=speed*speed*speed
-                                            speed+=1
+                                            coins-=baseSpeed*baseSpeed*baseSpeed
+                                            baseSpeed+=1
                                         elif event.key==K_BACKSPACE:
                                             break
 
@@ -271,18 +306,17 @@ while HP>0:#Test this against while True for speed
 
         elif event.type==KEYUP:
             if event.key==K_SPACE:
-                if enemy1OnScreen and enemy1X-guyX<48 and enemy1X-guyX>-32 and guyY-enemy1Y>-48 and guyY-enemy1Y<32:#Damaging enemy1
+                if enemy1OnScreen and enemy1X-guyX<48 and enemy1X-guyX>-32 and guyY-enemy1Y>-48 and guyY-enemy1Y<32:
                     enemy1HP-=1
                     window.blit(enemy1damaged, (enemy1X,enemy1Y))
                     pygame.display.update()
                     pygame.time.delay(100)
-
-        if HP<=0:
-            for size in range(1,120):
-                drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
-                pygame.display.update()
-            drawText("GAME OVER!", 120, (255,0,0),650,350)
-            pygame.display.update()
-            pygame.time.wait(3000)
-            pygame.quit()
-            sys.exit()
+                    
+for size in range(1,120):
+    drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
+    pygame.display.update()
+drawText("GAME OVER!", 120, (255,0,0),650,350)
+pygame.display.update()
+pygame.time.wait(5000)
+pygame.quit()
+sys.exit()
