@@ -22,6 +22,7 @@ def drawText(text, size, color, centerX, centerY):
     window.blit(renderedText, textpos)
 
 
+
 #Initialize everything
 ticks=0
 HP=100
@@ -117,8 +118,9 @@ while HP>0:
             speedY-=1
         elif speedY>=guyY:
             speedY+=1
-
-     
+        
+        
+        
     #Pick up Coin
     if coinOnScreen and coinX-guyX<60 and coinX-guyX>-5 and guyY-coinY>-60 and guyY-coinY<10:
         coinOnScreen=False
@@ -243,7 +245,7 @@ while HP>0:
                     guyY-=speed
 
             elif event.key==K_s:
-                if guyY<652:
+                if guyY<650:
                     guyY+=speed
 
             elif event.key==K_a:
@@ -317,6 +319,9 @@ for size in range(1,120):
     pygame.display.update()
 drawText("GAME OVER!", 120, (255,0,0),650,350)
 pygame.display.update()
-pygame.time.wait(5000)
-pygame.quit()
-sys.exit()
+pygame.time.delay(1000)
+while True:
+    for event in pygame.event.get():
+        if event:
+            pygame.quit()
+            sys.exit()
