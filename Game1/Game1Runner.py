@@ -37,6 +37,7 @@ coinOnScreen=False
 chestOnScreen=False
 doubleSpeedOnScreen=False
 plusHealthOnScreen=False
+DEOnScreen=False
 enemy1OnScreen=False
 enemy2OnScreen=False
 enemy1HP=0
@@ -53,6 +54,7 @@ dudeDamaged=pygame.image.load("dudeDamaged.gif")
 chest=pygame.image.load("chest.gif")
 doubleSpeed=pygame.image.load("doubleSpeed.gif")
 plusHealth=pygame.image.load("health.gif")
+destroyEnemies=pygame.image.load("destroyEnemies.gif")
 
 
 
@@ -91,6 +93,23 @@ while HP>0:
         plusHealthOnScreen=True
         healthX=randint(0,1267)
         healthY=randint(0,667)
+    #Make Destroy Enemies
+    if not(DEOnScreen) and randint(1,2500)==1:
+        DEOnScreen=True
+        DEX=randint(0,1267)
+        DEY=randint(0,667)
+    #Make Enemy1
+    if not(enemy1OnScreen) and randint(1,1000)==1:
+        enemy1OnScreen=True
+        enemy1X=randint(0,1260)
+        enemy1Y=randint(0,660)
+        enemy1HP=10
+    #Make Enemy2
+    if not(enemy2OnScreen) and randint(1,1000)==1:
+        enemy2OnScreen=True
+        enemy2X=randint(0,1260)
+        enemy2Y=randint(0,660)
+        enemy2HP=20
         
     #Draw Coin
     if coinOnScreen:
@@ -136,6 +155,25 @@ while HP>0:
             healthY-=1
         elif healthY>=guyY:
             healthY+=1
+    #Draw and Move Destroy Enemies
+    if DEOnScreen:
+        window.blit(destroyEnemies, (DEX, DEY))
+        if DEX<1:
+            DEX=1
+        if DEX>1254:
+            DEX=1254
+        if DEY<2:
+            DEY=2
+        if DEY>652:
+            DEY=652
+        if DEX<=guyX:
+            DEX-=1
+        elif DEX>=guyX:
+            DEX+=1
+        if DEY<=guyY:
+            DEY-=1
+        elif DEY>=guyY:
+            DEY+=1
         
         
     #Pick up Coin
@@ -155,20 +193,14 @@ while HP>0:
         HP+=5
         if HP>100:
             HP=100
-            
-
-    #Make Enemy1
-    if not(enemy1OnScreen) and randint(1,1000)==1:
-        enemy1OnScreen=True
-        enemy1X=randint(0,1260)
-        enemy1Y=randint(0,660)
-        enemy1HP=10
-    #Make Enemy2
-    if not(enemy2OnScreen) and randint(1,1000)==1:
-        enemy2OnScreen=True
-        enemy2X=randint(0,1260)
-        enemy2Y=randint(0,660)
-        enemy2HP=20
+    #Pick up Double Speed
+    if DEOnScreen and DEX-guyX<48 and DEX-guyX>-32 and guyY-DEY>-48 and guyY-DEY<32:
+        DEOnScreen=False
+        enemy1HP=0
+        enemy2HP=0
+        enemy1OnScreen=False
+        enemy2OnScreen=False
+        score+=50
 
 
     #Draw person on the screen
