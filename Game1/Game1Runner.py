@@ -4,7 +4,7 @@ from pygame.locals import *
 from random import randint
 pygame.init()
 window = pygame.display.set_mode((1300,700))
-pygame.display.set_caption("Game 1","Game 1")
+pygame.display.set_caption("Survive","Survive")
 pygame.key.set_repeat(1,1)
 
 #Methods
@@ -26,6 +26,7 @@ score=0
 baseSpeed=1
 speedStart=-501
 damageStart=-501
+infectStart=-2001
 regenSpeed=0.001
 guyX=randint(0,1250)
 guyY=randint(0,650)
@@ -42,14 +43,18 @@ DEOnScreen=False
 DDOnScreen=False
 enemy1OnScreen=False
 enemy2OnScreen=False
+zombieOnScreen=False
 enemy1HP=0
 enemy2HP=0
+zombieHP=0
 
 #Load Images
 enemy1=pygame.image.load("enemy1.gif")
 enemy1damaged=pygame.image.load("enemy1damaged.gif")
 enemy2=pygame.image.load("enemy2.gif")
 enemy2damaged=pygame.image.load("enemy2damaged.gif")
+zombie=pygame.image.load("zombie.gif")
+zombieDamaged=pygame.image.load("zombieDamaged.gif")
 chestOpened=pygame.image.load("chestOpened.gif")
 dude=pygame.image.load("dude.gif")
 dudeDamaged=pygame.image.load("dudeDamaged.gif")
@@ -74,7 +79,7 @@ while HP>0:
     drawText("HP: "+str(int(HP//1)), 26, (HPr, HPg, 0),650,50)
     drawText("SCORE: "+str(score), 26, (255,255,0),1100,20)
     if enemy1OnScreen or enemy2OnScreen:
-        drawText("TOTAL ENEMY HP: "+str(int(enemy1HP//1)+int(enemy2HP//1)), 26, (255,0,0),650,80)
+        drawText("TOTAL ENEMY HP: "+str(int(enemy1HP//1)+int(enemy2HP//1)+int(zombieHP//1)), 26, (255,0,0),650,80)
 
     #Make Coin
     if not(coinOnScreen) and randint(1,333)==1:
@@ -92,7 +97,7 @@ while HP>0:
         speedX=randint(0,1267)
         speedY=randint(0,667)
     #Make +Health
-    if not(plusHealthOnScreen) and randint(1,1000)==1:
+    if not(plusHealthOnScreen) and randint(1,1500)==1:
         plusHealthOnScreen=True
         healthX=randint(0,1267)
         healthY=randint(0,667)
@@ -118,6 +123,12 @@ while HP>0:
         enemy2X=randint(0,1260)
         enemy2Y=randint(0,660)
         enemy2HP=20
+    #Make Zombie
+    if not(zombieOnScreen) and randint(1,1000)==1:
+        zombieOnScreen=True
+        zombieX=randint(0,1250)
+        zombieY=randint(0,650)
+        zombieHP=20
         
     #Draw Coin
     if coinOnScreen:
@@ -220,13 +231,25 @@ while HP>0:
         HP+=5
         if HP>100:
             HP=100
+        infectStart=ticks-2001
     #Pick up Destroy Enemies
     if DEOnScreen and DEX-guyX<48 and DEX-guyX>-32 and guyY-DEY>-48 and guyY-DEY<32:
         DEOnScreen=False
         enemy1HP=0
         enemy2HP=0
+        zombieHP=0
+        if enemy1OnScreen:
+            coins+=10
+            score+=250
+        if enemy2OnScreen:
+            coins+=25
+            score+=500
+        if zombieOnScreen:
+            coins+=30
+            score+=750
         enemy1OnScreen=False
         enemy2OnScreen=False
+        zombieOnScreen=False
         score+=50
     #Pick up Double Damage
     if DDOnScreen and DDX-guyX<48 and DDX-guyX>-32 and guyY-DDY>-48 and guyY-DDY<32:
@@ -235,19 +258,36 @@ while HP>0:
         score+=50
 
 
-    #Draw person on the screen
-    window.blit(dude,(guyX,guyY))
 
+    if ticks-infectStart<2000:
+        window.blit(zombie, (guyX,guyY))
+        HP-=0.01
+    else:
+        window.blit(dude,(guyX,guyY))
+    
+
+    
     #Take damage from enemy1
     if enemy1OnScreen and enemy1X-guyX<48 and enemy1X-guyX>-32 and guyY-enemy1Y>-48 and guyY-enemy1Y<32:
-        HP-=0.05
-        window.blit(dudeDamaged,(guyX,guyY))
+        HP-=0.25
+        if ticks-infectStart<2000:
+            window.blit(zombieDamaged,(guyX,guyY))
+        else:
+            window.blit(dudeDamaged,(guyX,guyY))
     #Take damage from enemy2
     if enemy2OnScreen and enemy2X-guyX<48 and enemy2X-guyX>-32 and guyY-enemy2Y>-48 and guyY-enemy2Y<32:
         HP/=2
         window.blit(dudeDamaged,(guyX,guyY))
         enemy2OnScreen=False
         enemy2HP=0
+    #Take damage from Zombie
+    if zombieOnScreen and zombieX-guyX<48 and zombieX-guyX>-48 and guyY-zombieX>-48 and guyY-zombieY<48:
+        HP-=0.1
+        if randint(1,50)==1:
+            zombieOnScreen=False
+            zombieHP=0
+            infectStart=ticks
+
         
     #Change HP text color
     if HP>=50:
@@ -279,6 +319,17 @@ while HP>0:
         elif enemy2Y>guyY:
             enemy2Y-=1
         window.blit(enemy2, (enemy2X, enemy2Y))
+    #Move and draw Zombie
+    if zombieOnScreen:
+        if zombieX<guyX:
+            zombieX+=randint(1,4)
+        elif zombieX>guyX:
+            zombieX-=randint(1,4)
+        if zombieY<guyY:
+            zombieY+=randint(1,4)
+        elif zombieY>guyY:
+            zombieY-=randint(1,4)
+        window.blit(zombie, (zombieX, zombieY))
 
     #Damage enemy2 and check if dead
     if enemy1OnScreen and enemy2OnScreen and enemy1X-enemy2X<32 and enemy1X-enemy2X>-32 and enemy2Y-enemy1Y>-32 and enemy2Y-enemy1Y<32:
