@@ -27,6 +27,7 @@ baseSpeed=1
 speedStart=-501
 damageStart=-501
 infectStart=-2001
+zombieStart=-2501
 regenSpeed=0.001
 guyX=randint(0,1250)
 guyY=randint(0,650)
@@ -129,6 +130,7 @@ while HP>0:
         zombieX=randint(0,1250)
         zombieY=randint(0,650)
         zombieHP=20
+        zombieStart=ticks
         
     #Draw Coin
     if coinOnScreen:
@@ -261,7 +263,7 @@ while HP>0:
 
     if ticks-infectStart<2000:
         window.blit(zombie, (guyX,guyY))
-        HP-=0.01
+        HP-=0.015
     else:
         window.blit(dude,(guyX,guyY))
     
@@ -283,6 +285,7 @@ while HP>0:
     #Take damage from Zombie
     if zombieOnScreen and zombieX-guyX<48 and zombieX-guyX>-48 and guyY-zombieX>-48 and guyY-zombieY<48:
         HP-=0.1
+        window.blit(dudeDamaged, (guyX,guyY))
         if randint(1,50)==1:
             zombieOnScreen=False
             zombieHP=0
@@ -349,11 +352,20 @@ while HP>0:
         coins+=10
         enemy1HP=0
         score+=250
+    #Damage zombie with Double Damage
+    if ticks-damageStart<500:
+        zombieStart-=1
+    #Check if zombie epidemic has gone away
+    if zombieOnScreen and ticks-zombieStart>2500:
+        zombieOnScreen=False
+        zombieHP=0
+        coins+=30
+        score+=750
 
     #Regen HP
     if HP<100-regenSpeed:
         HP+=regenSpeed
-    elif HP<100:
+    else:
         HP=100
 
     #Open Chest
@@ -459,7 +471,7 @@ while HP>0:
                     pygame.time.delay(100)
                     
 for size in range(1,120):
-    pygame.time.delay(1)
+    pygame.time.delay(2)
     drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
     pygame.display.update()
 drawText("GAME OVER!", 120, (255,0,0),650,350)
