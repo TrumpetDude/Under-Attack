@@ -6,6 +6,11 @@ pygame.init()
 window = pygame.display.set_mode((1300,700))
 pygame.display.set_caption("Survive","Survive")
 pygame.key.set_repeat(1,1)
+from array import array
+from time import sleep
+import pygame
+from pygame.mixer import Sound, get_init, pre_init
+from tone import Note
 
 #Methods
 def windowFill(red,green,blue):
@@ -17,7 +22,42 @@ def drawText(text, size, color, centerX, centerY):
     textpos.centerx=centerX
     textpos.centery=centerY
     window.blit(renderedText, textpos)
-
+def playSound(hz,ms):
+    pre_init(44100, -16, 1, 1024)
+    Note(hz).play(ms)
+def done():
+    pygame.draw.line(window,(50,50,50),(0,350),(1300,350),200)
+    drawText("Are you sure you want to quit? Your Progress will not be saved.",20,(200,200,200),650,300)
+    drawText("Yes               No",24,(200,200,200),650,400)
+    pygame.draw.rect(window, (200,200,200), (395,375,100,50), 5)
+    pygame.draw.rect(window, (200,200,200), (815,375,100,50), 5)
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit(0)
+        mousePos=pygame.mouse.get_pos()
+        mousePressed=pygame.mouse.get_pressed()
+        if mousePos[1]>375 and mousePos[1]<425 and mousePos[0]>815 and mousePos[0]<915 and (mousePressed[0] or mousePressed[1] or mousePressed[2]):
+            break
+        if mousePos[1]>375 and mousePos[1]<425 and mousePos[0]>395 and mousePos[0]<495 and (mousePressed[0] or mousePressed[1] or mousePressed[2]):
+            pygame.quit()
+            sys.exit(0)
+def level2():
+    pygame.draw.line(window,(50,50,50),(0,350),(1300,350),200)
+    drawText("You have completed Level 1!",20,(200,200,200),650,300)
+    drawText("Continue",24,(200,200,200),650,400)
+    pygame.draw.rect(window, (200,200,200), (540,375,220,50), 5)
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type==KEYUP and event.key == K_ESCAPE):
+                done()
+        mousePos=pygame.mouse.get_pos()
+        mousePressed=pygame.mouse.get_pressed()
+        if mousePos[1]>375 and mousePos[1]<425 and mousePos[0]>540 and mousePos[0]<760 and (mousePressed[0] or mousePressed[1] or mousePressed[2]):
+            import zombieApocalypse
 #Initialize Variables
 ticks=0
 HP=100
@@ -78,8 +118,8 @@ while HP>0:
     drawText("+ HP REGEN: 2",12,(255, 0, 255),220,25)
     drawText("COINS: "+str(coins), 26, (255,255,0),650,20)
     drawText("HP: "+str(int(HP//1)), 26, (HPr, HPg, 0),650,50)
-    drawText("SCORE: "+str(score), 26, (255,255,0),1100,20)
-    if enemy1OnScreen or enemy2OnScreen:
+    drawText("SCORE: "+str(score), 26, (255,255,255),1100,20)
+    if enemy1OnScreen or enemy2OnScreen or zombieOnScreen:
         drawText("TOTAL ENEMY HP: "+str(int(enemy1HP//1)+int(enemy2HP//1)+int(zombieHP//1)), 26, (255,0,0),650,80)
 
     #Make Coin
@@ -88,7 +128,7 @@ while HP>0:
         coinX=randint(10,1290)
         coinY=randint(10,690)
     #Make Chest
-    if not(chestOnScreen) and randint(1,10000)==1:
+    if not(chestOnScreen) and randint(1,7500)==1:
         chestOnScreen=True
         chestX=randint(16,1200)
         chestY=randint(1,639)
@@ -218,16 +258,20 @@ while HP>0:
         
     #Pick up Coin
     if coinOnScreen and coinX-guyX<60 and coinX-guyX>-5 and guyY-coinY>-60 and guyY-coinY<10:
+        playSound(220, 50)
         coinOnScreen=False
         coins+=1
         score+=10
+        playSound(220, 50)
     #Pick up Double Speed
     if doubleSpeedOnScreen and speedX-guyX<48 and speedX-guyX>-32 and guyY-speedY>-48 and guyY-speedY<32:
+        playSound(264, 50)
         doubleSpeedOnScreen=False
         speedStart=ticks
         score+=50
     #Pick up +Health
     if plusHealthOnScreen and healthX-guyX<48 and healthX-guyX>-32 and guyY-healthY>-48 and guyY-healthY<32:
+        playSound(293.333333, 50)
         plusHealthOnScreen=False
         score+=50
         HP+=5
@@ -236,6 +280,7 @@ while HP>0:
         infectStart=ticks-2001
     #Pick up Destroy Enemies
     if DEOnScreen and DEX-guyX<48 and DEX-guyX>-32 and guyY-DEY>-48 and guyY-DEY<32:
+        playSound(307.375, 50)
         DEOnScreen=False
         enemy1HP=0
         enemy2HP=0
@@ -255,12 +300,13 @@ while HP>0:
         score+=50
     #Pick up Double Damage
     if DDOnScreen and DDX-guyX<48 and DDX-guyX>-32 and guyY-DDY>-48 and guyY-DDY<32:
+        playSound(330, 50)
         DDOnScreen=False
         damageStart=ticks
         score+=50
 
 
-
+    #Take damage from infection
     if ticks-infectStart<2000:
         window.blit(zombie, (guyX,guyY))
         HP-=0.015
@@ -282,14 +328,11 @@ while HP>0:
         window.blit(dudeDamaged,(guyX,guyY))
         enemy2OnScreen=False
         enemy2HP=0
-    #Take damage from Zombie
-    if zombieOnScreen and zombieX-guyX<48 and zombieX-guyX>-48 and guyY-zombieX>-48 and guyY-zombieY<48:
-        HP-=0.1
-        window.blit(dudeDamaged, (guyX,guyY))
-        if randint(1,50)==1:
-            zombieOnScreen=False
-            zombieHP=0
-            infectStart=ticks
+    #Get Infected by Zombie
+    if zombieOnScreen and zombieX-guyX<48 and zombieX-guyX>-48 and guyY-zombieY>-48 and guyY-zombieY<48 and randint(1,50)==1:
+        zombieOnScreen=False
+        zombieHP=0
+        infectStart=ticks
 
         
     #Change HP text color
@@ -341,6 +384,7 @@ while HP>0:
             enemy2HP-=0.2
         window.blit(enemy2damaged, (enemy2X,enemy2Y))
         if enemy2HP<=0:
+            playSound(440, 50)
             enemy2OnScreen=False
             coins+=25
             enemy2HP=0
@@ -348,6 +392,7 @@ while HP>0:
 
     #Check if enemy1 is dead
     if enemy1OnScreen and enemy1HP<=0:
+        playSound(396, 50)
         enemy1OnScreen=False
         coins+=10
         enemy1HP=0
@@ -357,6 +402,7 @@ while HP>0:
         zombieStart-=1
     #Check if zombie epidemic has gone away
     if zombieOnScreen and ticks-zombieStart>2500:
+        playSound(412.5, 50)
         zombieOnScreen=False
         zombieHP=0
         coins+=30
@@ -370,6 +416,7 @@ while HP>0:
 
     #Open Chest
     if chestOnScreen and chestX-guyX<48 and chestX-guyX>-100 and guyY-chestY>-48 and guyY-chestY<60:
+        playSound(165, 50)
         chestOnScreen=False
         window.blit(chestOpened, (chestX-15,chestY))
         pygame.display.update()
@@ -379,12 +426,14 @@ while HP>0:
         
     # Update the screen
     pygame.display.update()
-        
+
+    #Check if level has advanced
+    if score>=15000:
+        level2()
     # Check for key presses
     for event in pygame.event.get():
         if (event.type==KEYUP and event.key==K_ESCAPE)or event.type==QUIT:
-            pygame.quit()
-            sys.exit()
+            done()
         
         # Check if an arrow key is pressed and 
         # move guy in the correct direction
@@ -411,7 +460,8 @@ while HP>0:
                     guyX+=speed
 
             elif event.key==K_EQUALS:#DEVELOPER ONLY!
-                coins+=1
+                coins+=10
+                score+=100
                 
                     
             elif event.key==K_1:
@@ -432,6 +482,7 @@ while HP>0:
                                 for event in pygame.event.get():
                                     if event.type==KEYDOWN:
                                         if event.key==K_RETURN:
+                                            playSound(206.25, 50)
                                             coins-=baseSpeed*baseSpeed*baseSpeed
                                             baseSpeed+=1
                                         elif event.key==K_BACKSPACE:
@@ -455,21 +506,22 @@ while HP>0:
                                 for event in pygame.event.get():
                                     if event.type==KEYDOWN:
                                         if event.key==K_RETURN:
+                                            playSound(198, 50)
                                             coins-=int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed)
                                             regenSpeed+=0.001
                                         elif event.key==K_BACKSPACE:
                                             break
 
         elif event.type==KEYUP:
-            if event.key==K_SPACE:
-                if enemy1OnScreen and enemy1X-guyX<48 and enemy1X-guyX>-32 and guyY-enemy1Y>-48 and guyY-enemy1Y<32:
-                    enemy1HP-=1
-                    if ticks-damageStart<500:
+                if event.key==K_SPACE:
+                    if enemy1OnScreen and enemy1X-guyX<48 and enemy1X-guyX>-32 and guyY-enemy1Y>-48 and guyY-enemy1Y<32:
                         enemy1HP-=1
-                    window.blit(enemy1damaged, (enemy1X,enemy1Y))
-                    pygame.display.update()
-                    pygame.time.delay(100)
-                    
+                        if ticks-damageStart<500:
+                            enemy1HP-=1
+                        window.blit(enemy1damaged, (enemy1X,enemy1Y))
+                        pygame.display.update()
+                        pygame.time.delay(100)
+                   
 for size in range(1,120):
     pygame.time.delay(2)
     drawText("GAME OVER!", size, (randint(0,255), randint(0,255), randint(0,255)),650,350)
@@ -479,5 +531,4 @@ pygame.display.update()
 while True:
     for event in pygame.event.get():
         if (event.type==KEYUP and event.key==K_ESCAPE) or event.type==QUIT:
-            pygame.quit()
-            sys.exit()
+            done()
