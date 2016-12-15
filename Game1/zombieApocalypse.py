@@ -26,19 +26,33 @@ def playSound(hz,ms):
     pre_init(44100, -16, 1, 1024)
     Note(hz).play(ms)
 def done():
-    pygame.quit()
-    sys.exit(0)
+    pygame.draw.line(window,(25,75,25),(0,350),(1300,350),200)
+    drawText("Are you sure you want to quit? Your Progress will not be saved.",20,(120,200,120),650,300)
+    drawText("Yes               No",24,(120,200,120),650,400)
+    pygame.draw.rect(window, (120,200,120), (395,375,100,50), 5)
+    pygame.draw.rect(window, (120,200,120), (815,375,100,50), 5)
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit(0)
+        mousePos=pygame.mouse.get_pos()
+        mousePressed=pygame.mouse.get_pressed()
+        if mousePos[1]>375 and mousePos[1]<425 and mousePos[0]>815 and mousePos[0]<915 and (mousePressed[0] or mousePressed[1] or mousePressed[2]):
+            break
+        if mousePos[1]>375 and mousePos[1]<425 and mousePos[0]>395 and mousePos[0]<495 and (mousePressed[0] or mousePressed[1] or mousePressed[2]):
+            pygame.quit()
+            sys.exit(0)
     
 #Initialize Variables
 ticks=0
 HP=100
-coins=0
 score=0
-baseSpeed=1
+baseSpeed=6
 speedStart=-501
 infectStart=-2001
 infectAmount=0
-regenSpeed=0.001
 guyX=randint(0,1250)
 guyY=randint(0,650)
 red=0
@@ -46,8 +60,6 @@ green=0
 blue=0
 HPr=0
 HPg=255
-coinOnScreen=False
-chestOnScreen=False
 doubleSpeedOnScreen=False
 plusHealthOnScreen=False
 zombies = []
@@ -68,45 +80,25 @@ while HP>0:
     
     #Draw Background and words
     windowFill(red,green,blue)
-    pygame.draw.rect(window, (50,50,50), (0,0,315,50),0)
-    pygame.draw.line(window,(0,0,0) ,(125,0), (125,50), 5)
-    drawText("+ SPEED: 1",12,(0, 0, 255),50,25)
-    drawText("+ HP REGEN: 2",12,(255, 0, 255),220,25)
-    drawText("COINS: "+str(coins), 26, (255,255,0),650,20)
-    drawText("HP: "+str(int(HP//1)), 26, (HPr, HPg, 0),650,50)
-    drawText("SCORE: "+str(score), 26, (255,255,255),1100,20)
-    drawText("ZOMBIES: "+str(len(zombies)), 26, (255,0,0),650,80)
-
-    #Make Coin
-    if not(coinOnScreen) and randint(1,300)==1:
-        coinOnScreen=True
-        coinX=randint(10,1290)
-        coinY=randint(10,690)
-    #Make Chest
-    if not(chestOnScreen) and randint(1,6500)==1:
-        chestOnScreen=True
-        chestX=randint(16,1200)
-        chestY=randint(1,639)
+    drawText("HP: "+str(int(HP//1)), 26, (HPr, HPg, 0),650,20)
+    drawText("SCORE: "+str(score), 26, (50,150,50),1100,20)
+    drawText("ZOMBIES: "+str(len(zombies)), 26, (255,0,0),650,50)
+    
     #Make Double Speed
     if not(doubleSpeedOnScreen) and randint(1,600)==1 and ticks-speedStart>500:
         doubleSpeedOnScreen=True
         speedX=randint(0,1267)
         speedY=randint(0,667)
     #Make +Health
-    if not(plusHealthOnScreen) and randint(1,1000)==1:
+    if not(plusHealthOnScreen) and randint(1,800)==1:
         plusHealthOnScreen=True
         healthX=randint(0,1267)
         healthY=randint(0,667)
     #Make Zombie
     if randint(1,500)==1:
+        playSound(220,100)
         zombies.append([randint(0,1250),randint(0,650)])
-        
-    #Draw Coin
-    if coinOnScreen:
-        pygame.draw.circle(window, (255,255,0),(coinX,coinY),8,0)
-    #Draw Chest
-    if chestOnScreen:
-        window.blit(chest, (chestX, chestY))
+
     #Draw and Move Double Speed
     if doubleSpeedOnScreen:
         window.blit(doubleSpeed, (speedX, speedY))
@@ -146,14 +138,7 @@ while HP>0:
         elif healthY>=guyY:
             healthY+=1
 
-        
-    #Pick up Coin
-    if coinOnScreen and coinX-guyX<60 and coinX-guyX>-5 and guyY-coinY>-60 and guyY-coinY<10:
-        playSound(220, 50)
-        coinOnScreen=False
-        coins+=1
-        score+=10
-        playSound(220, 50)
+
     #Pick up Double Speed
     if doubleSpeedOnScreen and speedX-guyX<48 and speedX-guyX>-32 and guyY-speedY>-48 and guyY-speedY<32:
         playSound(264, 50)
@@ -170,7 +155,7 @@ while HP>0:
             HP=100
         infectStart=ticks-2001
 
-    #Take damagefrom infection
+    #Take damage from infection
     if ticks-infectStart<2000:
         window.blit(dudeDamaged, (guyX,guyY))
         HP-= infectAmount
@@ -182,6 +167,7 @@ while HP>0:
     #Get Infected by Zombie
     for z in zombies:
         if z[0]-guyX<48 and z[0]-guyX>-48 and guyY-z[1]>-48 and guyY-z[1]<48 and randint(1,100) == 1:
+            playSound(55, 100)
             zombies.pop(0)
             HP-=5
             infectAmount += 0.015
@@ -210,106 +196,51 @@ while HP>0:
 
 
     #Regen HP
-    if HP<100-regenSpeed:
-        HP+=regenSpeed
+    if HP<100-0.006:
+        HP+=0.006
     else:
         HP=100
 
-    #Open Chest
-    if chestOnScreen and chestX-guyX<48 and chestX-guyX>-100 and guyY-chestY>-48 and guyY-chestY<60:
-        playSound(165, 50)
-        chestOnScreen=False
-        window.blit(chestOpened, (chestX-15,chestY))
-        pygame.display.update()
-        coins+=randint(10,50)
-        score+=10*randint(10,100)
-        pygame.time.delay(500)
+    #Increase score
+    score+=len(zombies)
+
         
     # Update the screen
     pygame.display.update()
         
     # Check for key presses
     for event in pygame.event.get():
-        if (event.type==KEYUP and event.key==K_ESCAPE)or event.type==QUIT:
-            done()
+            if (event.type==KEYUP and event.key==K_ESCAPE)or event.type==QUIT:
+                done()
         
-        # Check if an arrow key is pressed and 
-        # move guy in the correct direction
-        elif event.type==KEYDOWN:
+            # Check if an arrow key is pressed and 
+            # move guy in the correct direction
+            keys = pygame.key.get_pressed()
             if ticks-speedStart<500:
                 speed=baseSpeed*2
             else:
                 speed=baseSpeed
 
-            if event.key==K_w:
+            if keys[K_w]:
                 if guyY>1:
                     guyY-=speed
 
-            elif event.key==K_s:
+            if keys[K_s]:
                 if guyY<652:
                     guyY+=speed
 
-            elif event.key==K_a:
+            if keys[K_a]:
                 if guyX>1:
                     guyX-=speed
 
-            elif event.key==K_d:
+            if keys[K_d]:
                 if guyX<1255:
                     guyX+=speed
 
-            elif event.key==K_EQUALS:#DEVELOPER ONLY!
+            if keys[K_EQUALS]:#DEVELOPER ONLY!
                 coins+=1
-                score+=0
-                
-                    
-            elif event.key==K_1:
-                if baseSpeed>=5.999:
-                    drawText("ALREADY AT MAXIMUM VELOCITY!", 24, (255, 0, 0),650,680)
-                    pygame.display.update()
-
-                elif coins<baseSpeed*baseSpeed*baseSpeed:
-                    drawText("NOT ENOUGH COINS! Cost: "+str(baseSpeed*baseSpeed*baseSpeed), 24, (255, 127,0),650,680)
-                    pygame.display.update()
-                        
-                else:
-                    drawText("Confirm Purchase \"SPEED +1\" for "+str(baseSpeed*baseSpeed*baseSpeed)+" Coins? ENTER/BACKSPACE", 20, (0, 0, 255),650,680)
-                    pygame.display.update()
-                    for event in pygame.event.get():
-                        if event.type==KEYDOWN:
-                            while not(event.type==KEYDOWN and (event.key==K_RETURN or event.key==K_BACKSPACE)):
-                                for event in pygame.event.get():
-                                    if event.type==KEYDOWN:
-                                        if event.key==K_RETURN:
-                                            playSound(206.25, 50)
-                                            coins-=baseSpeed*baseSpeed*baseSpeed
-                                            baseSpeed+=1
-                                        elif event.key==K_BACKSPACE:
-                                            break
-
-            elif event.key==K_2:                       
-                if regenSpeed>=0.005999:
-                    drawText("ALREADY AT MAXIMUM HP REGEN SPEED!", 24, (255, 0, 0),650,680)
-                    pygame.display.update()
-
-                elif coins<int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed):
-                    drawText("NOT ENOUGH COINS! Cost: "+str(int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed)), 24, (255, 127,0),650,680)
-                    pygame.display.update()
-                    
-                else:
-                    drawText("Confirm Purchase \"HP REGEN SPEED +1\" for "+str(int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed))+" Coins? RETURN/BACKSPACE", 19, (255, 0, 255),650,680)
-                    pygame.display.update()
-                    for event in pygame.event.get():
-                        if event.type==KEYDOWN:
-                            while not(event.type==KEYDOWN and (event.key==K_RETURN or event.key==K_BACKSPACE)):
-                                for event in pygame.event.get():
-                                    if event.type==KEYDOWN:
-                                        if event.key==K_RETURN:
-                                            playSound(198, 50)
-                                            coins-=int(1000*regenSpeed*1000*regenSpeed*1000*regenSpeed)
-                                            regenSpeed+=0.001
-                                        elif event.key==K_BACKSPACE:
-                                            break
-                   
+                score+=10
+                                  
 for size in range(1,120):
     pygame.time.delay(2)
     drawText("GAME OVER!", size, (0, size*2, 0),650,350)
