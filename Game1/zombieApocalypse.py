@@ -3,7 +3,7 @@ import pygame, sys
 from pygame.locals import *
 from random import randint
 pygame.init()
-window = pygame.display.set_mode((1300,700))
+window = pygame.display.set_mode((1300,700),pygame.FULLSCREEN)
 pygame.display.set_caption("Zombie Apocalypse","Zombie Apocalypse")
 pygame.key.set_repeat(1,1)
 from array import array
@@ -250,4 +250,5 @@ pygame.display.update()
 while True:
     for event in pygame.event.get():
         if (event.type==KEYUP and event.key==K_ESCAPE) or event.type==QUIT:
-            done()
+            pygame.quit()
+            sys.exit(0)
