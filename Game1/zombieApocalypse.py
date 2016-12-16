@@ -1,9 +1,9 @@
 #Setup
 import pygame, sys
 from pygame.locals import *
-from random import randint
+from random import randint, uniform
 pygame.init()
-window = pygame.display.set_mode((1300,700),pygame.FULLSCREEN)
+window = pygame.display.set_mode((1300,700))#,pygame.FULLSCREEN)
 pygame.display.set_caption("Zombie Apocalypse","Zombie Apocalypse")
 pygame.key.set_repeat(1,1)
 from array import array
@@ -97,7 +97,7 @@ while HP>0:
     #Make Zombie
     if randint(1,500)==1:
         playSound(220,100)
-        zombies.append([randint(0,1250),randint(0,650)])
+        zombies.append([randint(0,1250),randint(0,650),uniform(2,5)])
 
     #Draw and Move Double Speed
     if doubleSpeedOnScreen:
@@ -111,13 +111,13 @@ while HP>0:
         if speedY>652:
             speedY=652
         if speedX<=guyX:
-            speedX-=1
+            speedX-=2
         elif speedX>=guyX:
-            speedX+=1
+            speedX+=2
         if speedY<=guyY:
-            speedY-=1
+            speedY-=2
         elif speedY>=guyY:
-            speedY+=1
+            speedY+=2
     #Draw and Move +Health
     if plusHealthOnScreen:
         window.blit(plusHealth, (healthX, healthY))
@@ -130,13 +130,13 @@ while HP>0:
         if healthY>652:
             healthY=652
         if healthX<=guyX:
-            healthX-=1
+            healthX-=2
         elif healthX>=guyX:
-            healthX+=1
+            healthX+=2
         if healthY<=guyY:
-            healthY-=1
+            healthY-=2
         elif healthY>=guyY:
-            healthY+=1
+            healthY+=2
 
 
     #Pick up Double Speed
@@ -185,13 +185,13 @@ while HP>0:
     #Move and draw Zombies
     for z in zombies:
         if z[0]<guyX:
-            z[0]+=randint(1,4)
+            z[0]+=uniform(1,z[2])
         elif z[0]>guyX:
-            z[0]-=randint(1,4)
+            z[0]-=uniform(1,z[2])
         if z[1]<guyY:
-            z[1]+=randint(1,4)
+            z[1]+=uniform(1,z[2])
         elif z[1]>guyY:
-            z[1]-=randint(1,4)
+            z[1]-=uniform(1,z[2])
         window.blit(zombie, (z[0], z[1]))
 
 
@@ -237,10 +237,10 @@ while HP>0:
                 if guyX<1255:
                     guyX+=speed
 
-            if keys[K_EQUALS]:#DEVELOPER ONLY!
-                coins+=1
-                score+=10
-                                  
+            if keys[K_EQUALS]:#Make zombies manually              
+                playSound(220,100)
+                zombies.append([randint(0,1250),randint(0,650),uniform(2,5)])
+                                 
 for size in range(1,120):
     pygame.time.delay(2)
     drawText("GAME OVER!", size, (0, size*2, 0),650,350)
